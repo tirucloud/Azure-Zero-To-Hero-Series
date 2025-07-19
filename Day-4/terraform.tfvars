@@ -1,0 +1,10 @@
+
+subscription_id = "f150ed01-bde3-4013-8179-dd8b8a173002"
+location        = "eastus"
+resource_group  = "web-rg"
+vnet_name       = "web-vnet"
+subnet_name     = "web-subnet"
+vm_name         = "testservervm"
+vm_username     = "testuser"
+vm_password     = "India@123456"
+custom_data_file = "cloud-init.txt"

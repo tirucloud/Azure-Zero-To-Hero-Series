@@ -1,0 +1,19 @@
+
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - nginx
+  - wget
+  - unzip
+
+runcmd:
+  - systemctl enable nginx
+  - systemctl start nginx
+  - wget -O /tmp/lugx_temp.zip https://templatemo.com/download/templatemo_589_lugx_gaming
+  - unzip -q /tmp/lugx_temp.zip -d /var/www/
+  - mv /var/www/templatemo_589_lugx_gaming/* /var/www/html/
+  - rm -rf /tmp/lugx_temp.zip /var/www/templatemo_589_lugx_gaming
+  - chown -R www-data:www-data /var/www/html
+  - chmod -R 755 /var/www/html
+  - systemctl restart nginx
