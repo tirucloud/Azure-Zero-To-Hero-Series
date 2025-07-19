@@ -1,3 +1,4 @@
+# Create a resource group
 resource "azurerm_resource_group" "rg" {
   location = var.resource_group_location
   name     = "${random_pet.prefix.id}-rg"
@@ -116,7 +117,7 @@ resource "azurerm_windows_virtual_machine" "main" {
   }
 }
 
-# Install IIS web server to the virtual machine
+# Install and configure IIS web server to the virtual machine
 resource "azurerm_virtual_machine_extension" "web_server_install" {
   name                       = "${random_pet.prefix.id}-wsi"
   virtual_machine_id         = azurerm_windows_virtual_machine.main.id
@@ -127,7 +128,18 @@ resource "azurerm_virtual_machine_extension" "web_server_install" {
 
   settings = <<SETTINGS
     {
-      "commandToExecute": "powershell -ExecutionPolicy Unrestricted Install-WindowsFeature -Name Web-Server -IncludeAllSubFeature -IncludeManagementTools"
+      "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"
+        Install-WindowsFeature -Name Web-Server -IncludeAllSubFeature -IncludeManagementTools;
+        $zipPath = 'C:\\lugx_temp.zip';
+        $destPath = 'C:\\inetpub\\wwwroot';
+        Invoke-WebRequest -Uri 'https://templatemo.com/download/templatemo_589_lugx_gaming' -OutFile $zipPath;
+        Add-Type -AssemblyName System.IO.Compression.FileSystem;
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $destPath);
+        Remove-Item $zipPath;
+        $unzippedFolder = Get-ChildItem -Path $destPath -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1;
+        Move-Item -Path \\\"$($unzippedFolder.FullName)\\\\*\\\" -Destination $destPath -Force;
+        Remove-Item -Recurse -Force $unzippedFolder.FullName;
+        Restart-Service W3SVC;\""
     }
   SETTINGS
 }
